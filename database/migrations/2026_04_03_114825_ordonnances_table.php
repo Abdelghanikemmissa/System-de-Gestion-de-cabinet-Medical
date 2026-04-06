@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('secretaires', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+        Schema::create('ordonnances', function (Blueprint $table) {
+            $table->id(); // id : int
+            $table->foreignId('consultation_id')->constrained()->onDelete('cascade'); // -consultation_id : int
+            $table->text('contenu'); // -contenu : text
             $table->timestamps();
         });
     }
@@ -23,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('secretaires');
+        Schema::dropIfExists('ordonnances');
     }
 };
