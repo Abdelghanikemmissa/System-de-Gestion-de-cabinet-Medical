@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('disponibilites', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('medecin_id')->constrained('medecins')->onDelete('cascade');
-            $table->string('jour'); // ex: 'Lundi'
-            $table->time('heure_debut');
-            $table->time('heure_fin');
-            $table->boolean('est_libre')->default(true);
+            $table->id(); // id : int
+            $table->foreignId('medecin_id')->constrained()->onDelete('cascade'); // -medecin_id : int
+            $table->string('jour'); // -jour : string
+            $table->time('heure_debut'); // -heure_debut : time
+            $table->time('heure_fin'); // -heure_fin : time
+            $table->boolean('est_libre')->default(true); // -est_libre : bool
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('disponibilites');
     }
 };

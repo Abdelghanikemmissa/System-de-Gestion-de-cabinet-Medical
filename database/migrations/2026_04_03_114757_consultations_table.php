@@ -12,12 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('consultations', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('rendezvous_id')->constrained('rendezvous')->onDelete('cascade');
-            $table->dateTime('date_consultation');
-            $table->text('motif');
-            $table->text('compte_rendu');
-            $table->text('diagnostic');
+            $table->id(); // id : int
+            $table->foreignId('rendezvous_id')->constrained('rendez_vous')->onDelete('cascade'); // -rendezvous_id : int
+            $table->dateTime('date_consultation'); // -date_consultation : datetime
+            $table->text('compte_rendu'); // -compte_rendu : text
             $table->timestamps();
         });
     }

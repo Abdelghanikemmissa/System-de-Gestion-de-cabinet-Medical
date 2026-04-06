@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dossier_medicals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('patient_id')->constrained('patients')->onDelete('cascade');
-            $table->text('historique')->nullable();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            // Renomme la colonne de CNI vers cni
+            $table->renameColumn('CNI', 'cni');
         });
     }
 
@@ -24,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dossier_medicals');
+        Schema::table('users', function (Blueprint $table) {
+            // Permet de revenir en arrière si besoin
+            $table->renameColumn('cni', 'CNI');
+        });
     }
 };

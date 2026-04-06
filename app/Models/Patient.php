@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Patient extends Model
+{
+    protected $fillable = [
+        'user_id', 
+        'date_naissance', 
+        'telephone', 
+        'adresse', 
+        'sexe' 
+    ];
+
+    // Conversion automatique des types
+    protected $casts = [
+        'date_naissance' => 'date',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function rendezVous()
+    {
+        return $this->hasMany(RendezVous::class);
+    }
+}
