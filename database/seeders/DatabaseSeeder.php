@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
+    /**
+     * Seed the application's database.
+     */
     public function run(): void
     {
         // 1. CRÉATION DU MÉDECIN
@@ -22,7 +25,11 @@ class DatabaseSeeder extends Seeder
             'cni' => 'MED123',
             'role' => 'medecin',
         ]);
-        Medecin::create(['user_id' => $userMedecin->id, 'specialite' => 'Généraliste']);
+        
+        Medecin::create([
+            'user_id' => $userMedecin->id, 
+            'specialite' => 'Généraliste'
+        ]);
 
         // 2. CRÉATION DE LA SECRÉTAIRE
         $userSecretaire = User::create([
@@ -33,19 +40,23 @@ class DatabaseSeeder extends Seeder
             'cni' => 'SEC456',
             'role' => 'secretaire',
         ]);
-        Secretaire::create(['user_id' => $userSecretaire->id]);
+        
+        Secretaire::create([
+            'user_id' => $userSecretaire->id
+        ]);
 
-        // 3. CRÉATION DE 6 PATIENTS
+        // 3. LISTE DES 6 PATIENTS
         $patientsData = [
-            ['nom' => 'Dupont', 'prenom' => 'Jean', 'email' => 'jean@test.com', 'cni' => 'BE200200'],
-            ['nom' => 'Martin', 'prenom' => 'Alice', 'email' => 'alice@test.com', 'cni' => 'AA300300'],
-            ['nom' => 'Lefebvre', 'prenom' => 'Thomas', 'email' => 'thomas@test.com', 'cni' => 'CC400400'],
-            ['nom' => 'Moreau', 'prenom' => 'Sophie', 'email' => 'sophie@test.com', 'cni' => 'DD505505'],
-            ['nom' => 'Petit', 'prenom' => 'Lucas', 'email' => 'lucas@test.com', 'cni' => 'EE606606'],
-            ['nom' => 'Rousseau', 'prenom' => 'Emma', 'email' => 'emma@test.com', 'cni' => 'FF707707'],
+            ['nom' => 'Dupont', 'prenom' => 'Jean', 'email' => 'jean@test.com', 'cni' => 'BE200200', 'sexe' => 'M'],
+            ['nom' => 'Martin', 'prenom' => 'Alice', 'email' => 'alice@test.com', 'cni' => 'AA300300', 'sexe' => 'F'],
+            ['nom' => 'Lefebvre', 'prenom' => 'Thomas', 'email' => 'thomas@test.com', 'cni' => 'CC400400', 'sexe' => 'M'],
+            ['nom' => 'Moreau', 'prenom' => 'Sophie', 'email' => 'sophie@test.com', 'cni' => 'DD505505', 'sexe' => 'F'],
+            ['nom' => 'Petit', 'prenom' => 'Lucas', 'email' => 'lucas@test.com', 'cni' => 'EE606606', 'sexe' => 'M'],
+            ['nom' => 'Rousseau', 'prenom' => 'Emma', 'email' => 'emma@test.com', 'cni' => 'FF707707', 'sexe' => 'F'],
         ];
 
         foreach ($patientsData as $data) {
+            // Création de l'utilisateur (Compte)
             $userPatient = User::create([
                 'nom' => $data['nom'],
                 'prenom' => $data['prenom'],
@@ -55,9 +66,13 @@ class DatabaseSeeder extends Seeder
                 'role' => 'patient',
             ]);
 
+            // Création du profil Patient (Données médicales)
             Patient::create([
                 'user_id' => $userPatient->id,
-                'telephone' => '0600000000'
+                'telephone' => '0600000000',
+                'date_naissance' => '1995-05-15', 
+                'adresse' => 'Quartier Industriel, Casablanca',
+                'sexe' => $data['sexe']
             ]);
         }
     }
