@@ -2,124 +2,133 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Medecin;
-use App\Models\Disponibilite;
-use App\Models\DossierMedical;
-use App\Models\Consultation;
+use App\Models\Patient;
 use App\Models\RendezVous;
+use App\Models\User;
+use App\Models\Disponibilite;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class MedecinController extends Controller
 {
-    /**
-     * Définit les créneaux libres du médecin connecté
-     */
-    public function definirDisponibilites(Request $request)
+    // --- DASHBOARD ---
+    public function index()
     {
-        $request->validate([
-            '*.jour'        => 'required|date|after_or_equal:today',
-            '*.heure_debut' => 'required',
-            '*.heure_fin'   => 'required|after:*.heure_debut',
-        ]);
-
-        // Sécurité : on prend l'ID du médecin connecté via son compte User
-        $medecinId = Auth::user()->medecin->id;
-        $creneauxCrees = [];
-
-        foreach ($request->all() as $item) {
-            // Vérification doublon
-            $existe = Disponibilite::where('medecin_id', $medecinId)
-                ->where('jour', $item['jour'])
-                ->where('heure_debut', $item['heure_debut'])
-                ->exists();
-
-            if (!$existe) {
-                $creneauxCrees[] = Disponibilite::create([
-                    'medecin_id'  => $medecinId,
-                    'jour'        => $item['jour'],
-                    'heure_debut' => $item['heure_debut'],
-                    'heure_fin'   => $item['heure_fin'],
-                    'est_libre'   => true
-                ]);
-            }
+        $aujourdhui = now()->toDateString();
+        // On récupère le médecin connecté
+        $medecin = auth()->user()->medecin;
+        
+        if (!$medecin) {
+            return redirect('/')->with('error', 'Profil médecin non configuré.');
         }
 
-        return response()->json(['message' => count($creneauxCrees) . ' créneaux ajoutés.'], 201);
-    }
+        $nbPatients = Patient::count();
+        $rdvAujourdhui = RendezVous::where('medecin_id', $medecin->id)
+                                   ->whereDate('date_heure', $aujourdhui)
+                                   ->count();
 
-    /**
-     * Récupère le planning complet avec Infos Médecin
-     */
-    public function getDisponibilites()
-    {
-        // On utilise Query Builder pour lier les tables
-        $planning = DB::table('disponibilites')
-            ->join('medecins', 'medecins.id', '=', 'disponibilites.medecin_id')
-            ->join('users', 'users.id', '=', 'medecins.user_id')
-            ->select(
-                'users.nom as nom_medecin', 
-                'users.prenom as prenom_medecin',
-                'medecins.specialite',
-                'disponibilites.jour',
-                'disponibilites.heure_debut',
-                'disponibilites.heure_fin'
-            )
-            ->orderBy('disponibilites.jour', 'asc')
-            ->orderBy('disponibilites.heure_debut', 'asc')
+        $rendezVous = RendezVous::with('patient.user')
+            ->where('medecin_id', $medecin->id)
+            ->whereDate('date_heure', $aujourdhui)
+            ->orderBy('date_heure', 'asc')
             ->get();
 
-        if ($planning->isEmpty()) {
-            return response()->json([
-                'message' => 'Aucune disponibilité trouvée pour le moment.'
-            ], 200);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $planning
-        ], 200);
+        return view('dashboard.medecin.index', compact('nbPatients', 'rdvAujourdhui', 'rendezVous'));
     }
 
-    /**
-     * L'acte médical : crée la consultation et l'ordonnance liée
-     */
-    public function creerConsultation(Request $request)
+    // --- GESTION PATIENTS ---
+    public function listPatients()
     {
-        $fields = $request->validate([
-            'rendezvous_id'      => 'required|exists:rendez_vous,id',
-            'patient_id'         => 'required|exists:patients,id',
-            'compte_rendu'       => 'required|string',
-            'contenu_ordonnance' => 'nullable|string', // Optionnel
-        ]);
+        $patients = Patient::with(['user', 'consultations'])->paginate(10);
+        return view('dashboard.medecin.patients.index', compact('patients'));
+    }
 
-        $dossier = DossierMedical::where('patient_id', $fields['patient_id'])->first();
-
-        if (!$dossier) {
-            return response()->json(['message' => 'Dossier médical introuvable'], 404);
+    public function rechercheCni(Request $request)
+    {
+        $request->validate(['cni' => 'required']);
+        
+        $user = User::where('cni', $request->cni)->with('patient')->first();
+        
+        if (!$user || !$user->patient) {
+            return back()->with('error', 'Patient non trouvé avec cette CNI.');
         }
 
-        // 1. Création de la Consultation (Liaison Dossier + RDV)
-        $consultation = Consultation::create([
-            'rendezvous_id'      => $fields['rendezvous_id'],
-            'dossier_medical_id' => $dossier->id,
-            'date_consultation'  => now(),
-            'compte_rendu'       => $fields['compte_rendu'],
+        return redirect()->route('medecin.dossier', $user->patient->id);
+    }
+
+    // --- DOSSIER MÉDICAL ---
+    public function voirDossier($patient_id)
+    {
+        $patient = Patient::with(['user', 'dossierMedical.consultations.ordonnance'])
+                          ->findOrFail($patient_id);
+
+        return view('dashboard.medecin.dossier', compact('patient'));
+    }
+
+    
+    // --- PLANNING & DISPONIBILITÉS ---
+    public function voirPlanning()
+    {
+        $rendezVous = \App\Models\RendezVous::with(['patient.user'])
+            ->get();
+
+        $events = $rendezVous->map(function ($rdv) {
+            return [
+                'title' => $rdv->patient->user->nom . ' ' . $rdv->patient->user->prenom,
+                'start' => $rdv->date_heure, // Format YYYY-MM-DD HH:MM:SS
+                'url'   => route('medecin.dossier', $rdv->patient->id),
+                'backgroundColor' => '#2563eb', // Couleur bleue professionnelle
+            ];
+        });
+
+        return view('dashboard.medecin.planning', compact('events'));
+    }
+
+    public function storeDispo(Request $request)
+    {
+        // 1. Validation stricte
+        $request->validate([
+            'date'  => 'required|date',
+            'debut' => 'required',
+            'fin'   => 'required|after:debut',
         ]);
 
-        // 2. Création de l'ordonnance (uniquement si le contenu est fourni)
-        if (!empty($fields['contenu_ordonnance'])) {
-            // On utilise la méthode métier qu'on a mise dans le modèle Consultation
-            $consultation->genererOrdonnance($fields['contenu_ordonnance']);
+        try {
+            // 2. Création avec affichage d'erreur en cas d'échec
+            \App\Models\Disponibilite::create([
+                'medecin_id'  => auth()->user()->medecin->id,
+                'jour'        => $request->date,
+                'heure_debut' => $request->debut,
+                'heure_fin'   => $request->fin,
+                'est_libre'   => true, // Assure-toi que cette colonne existe !
+            ]);
+
+            return back()->with('success', 'Créneau ajouté avec succès !');
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            // AFFICHE L'ERREUR SQL EXACTE
+            dd($e->getMessage()); 
+        }
+    }
+    public function indexDispo(Request $request)
+    {
+        $query = \App\Models\Disponibilite::where('medecin_id', auth()->user()->medecin->id);
+
+        // Filtrage strict par format Y-m-d
+        if ($request->has('filter_date') && !empty($request->filter_date)) {
+            // La méthode whereDate traite automatiquement le format Y-m-d 
+            // renvoyé par votre input type="date"
+            $query->whereDate('jour', '=', $request->filter_date);
         }
 
-        // 3. Mise à jour du statut du RDV
-        RendezVous::where('id', $fields['rendezvous_id'])->update(['statut' => 'terminé']);
+        $disponibilites = $query->orderBy('jour', 'asc')->limit(5)->get();
 
-        return response()->json([
-            'message' => 'Consultation et ordonnance enregistrées.',
-            'data' => $consultation->load('ordonnance')
-        ], 201);
+        return view('dashboard.medecin.disponibilites', compact('disponibilites'));
+    }
+
+    public function destroy($id) {
+        \App\Models\Disponibilite::findOrFail($id)->delete();
+        return back()->with('success', 'Créneau supprimé.');
     }
 }

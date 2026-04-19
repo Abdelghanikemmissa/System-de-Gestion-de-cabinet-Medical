@@ -9,157 +9,167 @@ use App\Models\Medecin;
 use App\Models\RendezVous;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Disponibilite;
+use App\Models\Consultation;
 
 class PatientController extends Controller
 {
-    /**
-     * Liste tous les patients avec leurs informations personnelles.
-     * Utile pour le tableau de bord de la secrétaire.
-     */
-    public function index()
+
+    public function index(Request $request)
     {
-        $patients = DB::table('patients')
-            ->join('users', 'users.id', '=', 'patients.user_id')
-            ->select(
-                'users.nom', 
-                'users.prenom', 
-                'users.cni', 
-                'patients.adresse', 
-                'patients.sexe', 
-                'patients.telephone'
-            )
-            ->get();
+        // 1. On commence la requête de base
+        $query = Patient::with('user');
 
-        return response()->json([
-            'status' => 'success',
-            'count'  => $patients->count(),
-            'data'   => $patients
-        ], 200);
-    }
-
-    /**
-     * Recherche un patient spécifique par sa CNI.
-     * Retourne un profil complet (User + Patient) sans les données sensibles.
-     */
-    public function searchByCni($cni)
-    {
-        // On récupère l'utilisateur et son profil patient associé en une seule fois
-        $user = User::where('cni', $cni)->with('patient')->first();
-
-        if (!$user || !$user->patient) {
-            return response()->json([
-                'message' => "Aucun patient trouvé avec la CNI : $cni"
-            ], 404);
+        // 2. On applique le filtre de recherche si une recherche est envoyée
+        if ($request->filled('search')) {
+            $query->rechercher($request->search); // Utilise ton "Scope" créé dans le modèle
         }
 
-        // Fusion des données de l'User et du Patient
-        $data = array_merge($user->toArray(), $user->patient->toArray());
+        // 3. On pagine les résultats
+        $patients = $query->paginate(10);
 
-        // SÉCURITÉ : On retire les champs techniques et sensibles
-        unset(
-            $data['id'], 
-            $data['user_id'], 
-            $data['password'], 
-            $data['email_verified_at'], 
-            $data['created_at'], 
-            $data['updated_at']
-        );
-
-        return response()->json([
-            'status' => 'success',
-            'data'   => $data
-        ]);
+        // 4. On retourne la vue partagée
+        return view('dashboard.medecin.patients.index', compact('patients'));
     }
 
     /**
-     * Permet à un patient de prendre un rendez-vous.
-     * Vérifie l'existence du patient et d'un médecin disponible.
+     * Recherche un patient spécifique et affiche son dossier complet
+     */
+    public function showByCni($cni)
+    {
+        $user = User::where('cni', $cni)->with(['patient.dossierMedical.consultations'])->first();
+
+        if (!$user || !$user->patient) {
+            return redirect()->back()->with('error', "Aucun patient trouvé avec la CNI : $cni");
+        }
+
+        $patient = $user->patient;
+        
+        // On redirige vers la vue du dossier détaillée que nous avons créée
+        return view('dashboard.medecin.dossier_detail', compact('patient'));
+    }
+
+    /**
+     * Permet de prendre un rendez-vous via le web
      */
     public function prendreRendezVous(Request $request)
     {
-        // 1. Validation des données entrantes
-        $fields = $request->validate([
-            'cni'        => 'required|exists:users,cni',
-            'date_heure' => 'required|date|after:now', // Empêche les RDV dans le passé
+        $request->validate([
+            'date_heure' => 'required|date|after:now',
             'motif'      => 'required|string|min:5'
         ]);
 
-        // 2. Récupération du profil complet
-        $user = User::where('cni', $fields['cni'])->first();
+        // On récupère le patient connecté (ou via la CNI si c'est la secrétaire)
+        $patient = Auth::user()->patient;
 
-        if (!$user->patient) {
-            return response()->json([
-                'message' => "L'utilisateur existe mais n'a pas de profil Patient complété."
-            ], 403);
+        if (!$patient) {
+            return redirect()->back()->with('error', "Profil patient incomplet.");
         }
 
-        // 3. Vérification de la présence d'un médecin (Sécurité anti-crash)
-        $medecin = Medecin::first();
-        if (!$medecin) {
-            return response()->json([
-                'message' => "Action impossible : Aucun médecin n'est configuré dans le système."
-            ], 500);
-        }
+        $medecin = Medecin::first(); 
 
-        // 4. Création du Rendez-vous
-        $rdv = RendezVous::create([
-            'patient_id' => $user->patient->id,
+        RendezVous::create([
+            'patient_id' => $patient->id,
             'medecin_id' => $medecin->id,
-            'date_heure' => $fields['date_heure'],
-            'motif'      => $fields['motif'],
+            'date_heure' => $request->date_heure,
+            'motif'      => $request->motif,
             'statut'     => 'en attente',
         ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Rendez-vous enregistré avec succès pour ' . $user->nom . ' ' . $user->prenom,
-            'data'    => $rdv
-        ], 201);
+        return redirect()->route('patient.dashboard')->with('success', 'Rendez-vous enregistré !');
+    }
+    public function rechercheParCni(Request $request)
+{
+    $request->validate(['cni' => 'required|string']);
+
+    // 1. On cherche d'abord l'utilisateur par sa CNI
+    $user = \App\Models\User::where('cni', $request->cni)->first();
+
+    // 2. Si l'utilisateur n'existe pas ou n'a pas de profil patient lié
+    if (!$user || !$user->patient) {
+        return redirect()->back()->with('error', 'Aucun patient trouvé avec cette CNI.');
     }
 
-    public function mesRendezVous($cni)
-    {
-        // 1. Trouver l'utilisateur par sa CNI
-        $user = User::where('cni', $cni)->first();
+    // 3. On redirige vers le dossier du patient lié à cet utilisateur
+    return redirect()->route('medecin.dossier', $user->patient->id);
+}
 
-        if (!$user || !$user->patient) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Patient non trouvé.'
-            ], 404);
-        }
+public function voirDossier($id)
+{
+    $patient = Patient::with(['user', 'dossierMedical.consultations'])->findOrFail($id);
+    
+    // On trie les consultations par date, les plus récentes d'abord
+    $consultations = $patient->dossierMedical->consultations->sortByDesc('created_at');
+    
+    return view('dashboard.medecin.patients.dossier', compact('patient', 'consultations'));
+}
 
-        // 2. Récupérer les rendez-vous
-        $rendezvous = RendezVous::where('patient_id', $user->patient->id)
-            ->with('medecin.user') 
-            ->orderBy('date_heure', 'desc')
-            ->get();
+public function createConsultation($patient_id)
+{
+    $patient = Patient::findOrFail($patient_id);
+    // Ici, tu affiches la vue contenant le formulaire
+    return view('dashboard.medecin.consultation_form', compact('patient'));
+}
 
-        // --- AJOUT : Vérification si la liste est vide ---
-        if ($rendezvous->isEmpty()) {
-            return response()->json([
-                'status'  => 'success',
-                'message' => 'Vous n\'avez aucun rendez-vous.',
-                'data'    => [] 
-            ]);
-        }
 
-        // 3. Transformer les données si elles existent
-        $dataSimplifiee = $rendezvous->map(function ($rdv) {
-            return [
-                'date_heure' => $rdv->date_heure,
-                'statut'     => $rdv->statut,
-                'nom_medecin' => $rdv->medecin && $rdv->medecin->user 
-                                ? 'Dr. ' . $rdv->medecin->user->nom 
-                                : 'Médecin non assigné'
-            ];
-        });
+public function storeConsultation(Request $request)
+{
+    // 1. Validation : Vérifie que le patient existe et que les données sont là
+    $request->validate([
+        'patient_id'   => 'required|exists:patients,id',
+        'observations' => 'required|string',
+        'rendezvous_id'=> 'nullable|exists:rendez_vous,id',
+    ]);
 
-        return response()->json([
-            'status'  => 'success',
-            'data'    => $dataSimplifiee
-        ]);
-    }
+    // 2. Récupération du dossier médical du patient
+    // firstOrCreate permet de créer le dossier s'il n'existe pas encore
+    $patient = \App\Models\Patient::findOrFail($request->patient_id);
+    $dossier = \App\Models\DossierMedical::firstOrCreate(['patient_id' => $patient->id]);
+
+    // 3. Création de la consultation
+    // On utilise les noms de colonnes réels de ta migration
+    \App\Models\Consultation::create([
+        'dossier_medical_id' => $dossier->id,
+        'rendezvous_id'      => $request->rendezvous_id ?? null,
+        'date_consultation'  => now(),            // Obligatoire : Date actuelle
+        'compte_rendu'       => $request->observations, // 'observations' devient 'compte_rendu'
+    ]);
+
+    return redirect()->route('medecin.dossier', $request->patient_id)
+                     ->with('success', 'Consultation enregistrée avec succès.');
+}
+
+public function store(Request $request)
+{
+    // 1. Validation : Assure-toi que les champs obligatoires sont présents
+    $request->validate([
+        'observations'  => 'required|string', // Sera mappé sur compte_rendu
+        'rendezvous_id' => 'required|exists:rendez_vous,id', // Obligatoire selon ta migration
+    ]);
+
+    // 2. Création de la consultation avec les champs exacts de la migration
+    \App\Models\Consultation::create([
+        'rendezvous_id'     => $request->rendezvous_id,
+        'date_consultation' => now(), // Ajout de la date actuelle obligatoire
+        'compte_rendu'      => $request->observations, // Mappage de observations vers compte_rendu
+    ]);
+
+    return redirect()->back()->with('success', 'Consultation enregistrée avec succès.');
+}
+
+
+public function storeOrdonnance(Request $request)
+{
+    $request->validate([
+        'consultation_id' => 'required|exists:consultations,id',
+        'contenu'         => 'required|string',
+    ]);
+
+    $consultation = \App\Models\Consultation::findOrFail($request->consultation_id);
+
+    // Utilise la méthode 'genererOrdonnance' que tu as déjà dans ton modèle Consultation
+    $consultation->genererOrdonnance($request->contenu);
+
+    return redirect()->back()->with('success', 'Ordonnance créée avec succès.');
+}
 
 }

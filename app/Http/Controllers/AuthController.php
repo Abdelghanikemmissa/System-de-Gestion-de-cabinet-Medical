@@ -3,39 +3,47 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
-    {
-        $fields = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string'
-        ]);
-
-        $user = User::where('email', $fields['email'])->first();
-
-        if (!$user || !Hash::check($fields['password'], $user->password)) {
-            return response(['message' => 'Identifiants incorrects'], 401);
-        }
-
-        $token = $user->createToken('myapptoken')->plainTextToken;
-
-        return response([
-            'user'    => $user,
-            'token'   => $token,
-            'role'    => $user->role, // Très utile pour le Frontend
-            'message' => 'Login réussi !'
-        ], 200);
+    // Affiche la vue de login
+    public function showLogin() {
+        return view('auth.login');
     }
 
+    // Gère la connexion avec redirection par rôle
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (Auth::attempt($credentials, $request->has('remember'))) {
+            $request->session()->regenerate();
+            $user = Auth::user();
+
+            // Redirection dynamique selon le rôle
+            return match ($user->role) {
+                'medecin'    => redirect()->intended('/medecin/dashboard'),
+                'secretaire' => redirect()->intended('/secretaire/dashboard'),
+                default      => redirect()->intended('/'),
+            };
+        }
+
+        return back()->withErrors([
+            'email' => 'Les identifiants sont incorrects.',
+        ])->onlyInput('email');
+    }
+
+    // Gère la déconnexion
     public function logout(Request $request)
     {
-        // Supprime tous les tokens de l'utilisateur connecté
-        $request->user()->tokens()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Déconnecté avec succès'], 200);
+        return redirect()->route('login');
     }
 }

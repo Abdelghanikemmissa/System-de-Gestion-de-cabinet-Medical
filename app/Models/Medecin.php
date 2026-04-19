@@ -27,4 +27,16 @@ class Medecin extends Model
     {
         return $this->hasMany(RendezVous::class, 'medecin_id');
     }
+   
+public function verifierDisponibilite($date, $heure)
+{
+    // On compte les RDV à cette date et cette heure précise (ex: 2026-04-17 09:30:00)
+    $count = \App\Models\RendezVous::whereDate('date_heure', $date)
+                ->whereTime('date_heure', $heure)
+                ->where('statut', '!=', 'annule')
+                ->count();
+
+    // Retourne vrai si on a moins de 3 rendez-vous
+    return $count < 3;
+}
 }

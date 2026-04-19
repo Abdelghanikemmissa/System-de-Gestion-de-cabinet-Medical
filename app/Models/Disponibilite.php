@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Disponibilite extends Model
 {
+
     protected $fillable = [
-        'medecin_id', 
-        'jour', 
-        'heure_debut', 
-        'heure_fin', 
-        'est_libre'
-    ];
+    'medecin_id',
+    'jour',      // Ajoute cette ligne si elle n'existe pas
+    'heure_debut',
+    'heure_fin',
+    'est_libre'
+];
 
     protected $casts = [
         'jour' => 'date',
