@@ -3,39 +3,40 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $fields = $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string'
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
         ]);
 
-        $user = User::where('email', $fields['email'])->first();
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $user = Auth::user();
 
-        if (!$user || !Hash::check($fields['password'], $user->password)) {
-            return response(['message' => 'Identifiants incorrects'], 401);
+            // Direct to dashboard if user is a secretary
+            if ($user->role === 'secretaire') {
+                return redirect()->intended('/secretaire/dashboard');
+            }
+
+            return redirect('/');
         }
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
-
-        return response([
-            'user'    => $user,
-            'token'   => $token,
-            'role'    => $user->role, // Très utile pour le Frontend
-            'message' => 'Login réussi !'
-        ], 200);
+        return back()->withErrors([
+            'email' => 'Les identifiants ne correspondent pas à nos enregistrements.',
+        ]);
     }
 
     public function logout(Request $request)
     {
-        // Supprime tous les tokens de l'utilisateur connecté
-        $request->user()->tokens()->delete();
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return response()->json(['message' => 'Déconnecté avec succès'], 200);
+        return redirect('/');
     }
 }
