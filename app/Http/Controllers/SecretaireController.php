@@ -2,40 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Secretaire;
 use App\Models\RendezVous;
+use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SecretaireController extends Controller
 {
-    /**
-     * Valider un rendez-vous spécifique
-     * L'ID ici est celui du RENDEZ-VOUS
-     */
+    public function showDashboard()
+    {
+        $stats = [
+            'today_rv' => RendezVous::whereDate('date_heure', today())->count(),
+            'new_patients' => Patient::whereDate('created_at', today())->count(),
+            'pending' => RendezVous::where('statut', 'en attente')->count(),
+        ];
+
+        $rendezvous = RendezVous::with(['patient.user', 'medecin.user'])
+            ->where('statut', 'en attente')
+            ->orderBy('date_heure', 'asc')
+            ->get();
+
+        return view('/secretaire/dashboard', compact('stats', 'rendezvous'));
+    }
+
     public function validerRendezVous(Request $request, $id)
     {
-        
-        // On récupère la secrétaire actuellement connectée
         $secretaire = Auth::user()->secretaire;
 
         if (!$secretaire) {
-            return response()->json(['message' => 'Action non autorisée'], 403);
+            return back()->with('error', 'Action non autorisée');
         }
 
-        // On appelle ta méthode du modèle qui change le statut ET envoie l'email
         $success = $secretaire->validerRendezVous($id);
 
-        if ($success) {
-            return response()->json(['message' => 'Rendez-vous validé avec succès']);
-        }
-
-        return response()->json(['message' => 'Rendez-vous introuvable'], 404);
+        return $success 
+            ? back()->with('success', 'Rendez-vous validé !')
+            : back()->with('error', 'Rendez-vous introuvable');
     }
 
-    /**
-     * Création complète : Compte + Profil Patient + Dossier
-     */
     public function ajouterNouveauPatient(Request $request)
     {
         $validated = $request->validate([
@@ -50,10 +54,34 @@ class SecretaireController extends Controller
         ]);
 
         $secretaire = Auth::user()->secretaire;
-
-        // Utilisation de ta méthode "atomique" du modèle
         $secretaire->creerFicheEtDossier($validated['cni'], $validated);
 
-        return response()->json(['message' => 'Succès ! Le compte patient et son dossier médical sont créés.']);
+        return redirect()->route('secretaire.dashboard')->with('success', 'Patient créé avec succès');
+    }
+
+    public function indexPatients()
+    {
+        // Fetches all patients with their user account information
+        $patients = \App\Models\Patient::with('user')->get();
+        
+        return view('/secretaire/patient', compact('patients'));
+    }
+
+
+    public function indexRendezVous()
+    {
+        $rendezvous = RendezVous::with(['patient.user', 'medecin.user'])
+            ->orderBy('date_heure', 'desc')
+            ->get();
+
+        return view('secretaire.rendezvous', compact('rendezvous'));
+    }
+
+    public function annulerRendezVous(Request $request, $id)
+    {
+        $rdv = RendezVous::findOrFail($id);
+        $rdv->update(['statut' => 'annulé']);
+
+        return back()->with('success', 'Rendez-vous annulé avec succès.');
     }
 }
