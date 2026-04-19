@@ -86,7 +86,7 @@
                             <td class="px-8 py-5 text-slate-600">Dr. {{ $rdv->medecin->user->nom }}</td>
                             <td class="px-8 py-5 text-slate-600">{{ $rdv->date_heure->format('d/m/Y H:i') }}</td>
                             <td class="px-8 py-5">
-                                <form action="{{ route('secretaire.valider', $rdv->id) }}" method="POST">
+                                <form action="{{ route('secretaire.confirmer', $rdv->id) }}" method="POST">
                                     @csrf
                                     <button class="bg-slate-900 text-white text-xs px-4 py-2 rounded-lg hover:bg-emerald-600 transition font-bold uppercase">Confirmer</button>
                                 </form>

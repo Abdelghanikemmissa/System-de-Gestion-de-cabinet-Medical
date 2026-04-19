@@ -25,20 +25,7 @@ class SecretaireController extends Controller
         return view('/secretaire/dashboard', compact('stats', 'rendezvous'));
     }
 
-    public function validerRendezVous(Request $request, $id)
-    {
-        $secretaire = Auth::user()->secretaire;
-
-        if (!$secretaire) {
-            return back()->with('error', 'Action non autorisée');
-        }
-
-        $success = $secretaire->validerRendezVous($id);
-
-        return $success 
-            ? back()->with('success', 'Rendez-vous validé !')
-            : back()->with('error', 'Rendez-vous introuvable');
-    }
+  
 
     public function ajouterNouveauPatient(Request $request)
     {
@@ -68,20 +55,42 @@ class SecretaireController extends Controller
     }
 
 
-    public function indexRendezVous()
-    {
-        $rendezvous = RendezVous::with(['patient.user', 'medecin.user'])
-            ->orderBy('date_heure', 'desc')
-            ->get();
+    // Modifier/Ajouter ces méthodes dans SecretaireController
 
-        return view('secretaire.rendezvous', compact('rendezvous'));
+       public function indexRendezVous() {
+    // This fetches all appointments so you can see 'en attente' ones at the top
+        $rendezvous = RendezVous::with(['patient.user', 'medecin.user'])
+            // ->orderByRaw("FIELD(statut, 'en attente') DESC") 
+            ->orderBy('date_heure', 'asc')
+            ->get();
+        
+    return view('secretaire.rendezvous', compact('rendezvous'));
+}
+
+    public function confirmerRendezVous($id) {
+        $rdv = RendezVous::findOrFail($id);
+        $rdv->update(['statut' => 'confirmé']);
+        return back()->with('success', 'Le rendez-vous a été confirmé.');
     }
 
-    public function annulerRendezVous(Request $request, $id)
-    {
+    public function validerRendezVous($id) {
+    // 1. Find the specific appointment
+    $rdv = RendezVous::findOrFail($id);
+
+    // 2. Update the status directly
+    $rdv->update([
+        'statut' => 'confirmé'
+    ]);
+
+    // 3. Go back to the list
+    return back()->with('success', 'Rendez-vous confirmé avec succès !');
+}
+
+    public function annulerRendezVous($id) {
         $rdv = RendezVous::findOrFail($id);
         $rdv->update(['statut' => 'annulé']);
-
-        return back()->with('success', 'Rendez-vous annulé avec succès.');
+        return back()->with('success', 'Le rendez-vous a été annulé.');
     }
+
+ 
 }
