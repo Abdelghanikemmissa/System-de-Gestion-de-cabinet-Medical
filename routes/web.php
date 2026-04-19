@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MedecinController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ConsultationController;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,6 +46,7 @@ Route::get('/recherche-cni', [MedecinController::class, 'rechercheCni'])->name('
     // --- Routes de Consultation ---
     
 // 1. Affiche le formulaire (GET)
+
     Route::get('/consultation/create/{patient_id}', [ConsultationController::class, 'create'])
          ->name('consultation.create');
 
@@ -57,7 +59,8 @@ Route::get('/recherche-cni', [MedecinController::class, 'rechercheCni'])->name('
          ->name('ordonnance.store');
     Route::delete('/disponibilites/{id}', [MedecinController::class, 'destroy'])->name('dispo.destroy');
     
-
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.show');
 
 
     Route::get('/ordonnance/{id}/pdf', function ($id) {

@@ -25,6 +25,7 @@ class ConsultationController extends Controller
     $request->validate([
         'patient_id'   => 'required|exists:patients,id',
         'compte_rendu' => 'required|string',
+        
     ]);
 
     $patient = \App\Models\Patient::findOrFail($request->patient_id);
