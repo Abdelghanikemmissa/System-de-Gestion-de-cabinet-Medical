@@ -47,4 +47,5 @@ class RendezVous extends Model
 {
     return $this->hasMany(Consultation::class, 'rendezvous_id');
 }
+
 }

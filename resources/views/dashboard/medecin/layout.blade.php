@@ -47,7 +47,8 @@
 
         <div class="p-4 border-t bg-slate-50">
             <div class="flex items-center gap-3 mb-4">
-                <img src="https://i.pravatar.cc/40?u={{ auth()->user()->id }}" class="rounded-full w-10 h-10 border-2 border-white shadow-sm">
+                <img src="{{ auth()->user()->photo ? asset('storage/'.auth()->user()->photo) : 'https://i.pravatar.cc/40?u='.auth()->user()->id }}" 
+                class="rounded-full w-10 h-10 border-2 border-white shadow-sm">
                 <div>
                     <p class="text-sm font-bold">Dr. {{ auth()->user()->nom }}</p>
                     <p class="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">En ligne</p>
@@ -74,7 +75,14 @@
                     <i class="fas fa-bell text-lg text-slate-400"></i>
                     <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
                 </div>
-                <img src="https://i.pravatar.cc/40?u={{ auth()->user()->id }}" class="rounded-full border shadow-sm">
+                <a href="{{ route('medecin.profile.show') }}" class="flex items-center gap-3 mb-4 hover:bg-slate-100 p-2 rounded-xl transition">
+    <img src="{{ auth()->user()->photo ? asset('storage/'.auth()->user()->photo) : 'https://i.pravatar.cc/40?u='.auth()->user()->id }}" 
+         class="rounded-full w-10 h-10 border-2 border-white shadow-sm">
+    <div>
+        <p class="text-sm font-bold">Dr. {{ auth()->user()->nom }}</p>
+        <p class="text-[10px] text-blue-500 font-bold uppercase tracking-wider underline">Modifier mon profil</p>
+    </div>
+</a>
             </div>
         </header>
 
