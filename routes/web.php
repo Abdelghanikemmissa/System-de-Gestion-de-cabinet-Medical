@@ -66,3 +66,19 @@ Route::get('/recherche-cni', [MedecinController::class, 'rechercheCni'])->name('
 })->name('ordonnance.pdf');
 });
 
+use App\Http\Controllers\SecretaireController;
+
+
+Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/secretaire/dashboard', [SecretaireController::class, 'showDashboard'])->name('secretaire.dashboard');
+    Route::get('/secretaire/patients', [SecretaireController::class, 'indexPatients'])->name('secretaire.patients');
+    
+    // Appointment Management
+    Route::get('/secretaire/rendez-vous', [SecretaireController::class, 'indexRendezVous'])->name('secretaire.rendezvous');
+    Route::post('/secretaire/rendez-vous/valider/{id}', [SecretaireController::class, 'validerRendezVous'])->name('secretaire.valider');
+    Route::post('/secretaire/rendez-vous/annuler/{id}', [SecretaireController::class, 'annulerRendezVous'])->name('secretaire.annuler');
+});
