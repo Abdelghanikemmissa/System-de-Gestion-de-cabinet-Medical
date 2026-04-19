@@ -6,6 +6,9 @@ use App\Models\User;
 use App\Models\Medecin;
 use App\Models\Secretaire;
 use App\Models\Patient;
+use App\Models\DossierMedical;
+use App\Models\RendezVous;
+use App\Models\Consultation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,36 +16,21 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. CRÉATION DU MÉDECIN
+        // 1. MÉDECIN
         $userMedecin = User::create([
-            'nom' => 'Alami',
-            'prenom' => 'Ahmed',
-            'email' => 'medecin@test.com',
-            'password' => Hash::make('password'),
-            'cni' => 'MED123',
-            'role' => 'medecin',
+            'nom' => 'Alami', 'prenom' => 'Ahmed', 'email' => 'medecin@test.com',
+            'password' => Hash::make('password'), 'cni' => 'MED123', 'role' => 'medecin',
         ]);
-        
-        Medecin::create([
-            'user_id' => $userMedecin->id, 
-            'specialite' => 'Cardiologue'
-        ]);
+        $medecin = Medecin::create(['user_id' => $userMedecin->id, 'specialite' => 'Cardiologue']);
 
-        // 2. CRÉATION DE LA SECRÉTAIRE
+        // 2. SECRÉTAIRE
         $userSecretaire = User::create([
-            'nom' => 'Bennani',
-            'prenom' => 'Sanaa',
-            'email' => 'secretaire@test.com',
-            'password' => Hash::make('password'),
-            'cni' => 'SEC456',
-            'role' => 'secretaire',
+            'nom' => 'Bennani', 'prenom' => 'Sanaa', 'email' => 'secretaire@test.com',
+            'password' => Hash::make('password'), 'cni' => 'SEC456', 'role' => 'secretaire',
         ]);
-        
-        Secretaire::create([
-            'user_id' => $userSecretaire->id
-        ]);
+        Secretaire::create(['user_id' => $userSecretaire->id]);
 
-        // 3. CRÉATION DE 6 PATIENTS AVEC DONNÉES COMPLÈTES
+        // 3. PATIENTS, DOSSIERS, RDV ET CONSULTATIONS
         $patientsData = [
             ['nom' => 'Idrissi', 'prenom' => 'Yassine', 'email' => 'yassine@test.com', 'cni' => 'BJ100', 'sexe' => 'M', 'tel' => '0611223344'],
             ['nom' => 'Mansouri', 'prenom' => 'Fatima', 'email' => 'fatima@test.com', 'cni' => 'AA200', 'sexe' => 'F', 'tel' => '0655667788'],
@@ -54,20 +42,34 @@ class DatabaseSeeder extends Seeder
 
         foreach ($patientsData as $data) {
             $userPatient = User::create([
-                'nom' => $data['nom'],
-                'prenom' => $data['prenom'],
-                'email' => $data['email'],
-                'password' => Hash::make('password'),
-                'cni' => $data['cni'],
-                'role' => 'patient',
+                'nom' => $data['nom'], 'prenom' => $data['prenom'], 'email' => $data['email'],
+                'password' => Hash::make('password'), 'cni' => $data['cni'], 'role' => 'patient',
             ]);
 
-            Patient::create([
+            $patient = Patient::create([
                 'user_id' => $userPatient->id,
                 'telephone' => $data['tel'],
-                'date_naissance' => '1990-01-01', // Date par défaut pour éviter l'erreur NOT NULL
+                'date_naissance' => '1990-01-01',
                 'adresse' => 'Quartier Gauthier, Casablanca',
                 'sexe' => $data['sexe']
+            ]);
+
+            // Dossier médical
+            DossierMedical::create(['patient_id' => $patient->id, 'historique' => 'Dossier initial.']);
+
+            // Rendez-vous (Aléatoire)
+            $rdv = RendezVous::create([
+                'patient_id' => $patient->id,
+                'medecin_id' => $medecin->id,
+                'date_heure' => now()->addDays(rand(0, 3))->setHour(rand(9, 17)),
+                'statut' => 'en attent',
+            ]);
+
+            // Consultation (Historique)
+            Consultation::create([
+                'rendezvous_id' => $rdv->id,
+                'compte_rendu' => 'Examen de contrôle standard.',
+                'date_consultation' => now()->subDays(10),
             ]);
         }
     }

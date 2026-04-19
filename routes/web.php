@@ -71,6 +71,8 @@ use App\Http\Controllers\SecretaireController;
 
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
+Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
 
 
 Route::middleware(['auth'])->group(function () {
