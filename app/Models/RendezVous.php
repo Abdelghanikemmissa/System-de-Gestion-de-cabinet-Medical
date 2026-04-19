@@ -43,4 +43,8 @@ class RendezVous extends Model
     {
         return $this->belongsTo(Medecin::class, 'medecin_id');
     }
+    public function consultations()
+{
+    return $this->hasMany(Consultation::class, 'rendezvous_id');
+}
 }

@@ -9,25 +9,32 @@ class Ordonnance extends Model
 {
     protected $fillable = ['id', 'consultation_id', 'contenu'];
 
-    public function genererDocumentPDF(){
-    // Sécurité N+1 et vérification des relations
-        if (!$this->consultation || !$this->consultation->dossier) {
-            throw new \Exception("Données de consultation incomplètes.");
-        }
+    public function genererDocumentPDF()
+{
+    // Charger les relations nécessaires pour éviter les erreurs de null
+    $this->load(['consultation.rendezvous.medecin.user', 'consultation.dossier.patient.user']);
 
-        $data = [
-            'ordonnance' => $this,
-            'patient'    => $this->consultation->dossier->patient->user ?? null,
-            'medecin'    => $this->consultation->rendezvous->medecin->user ?? null,
-            'date'       => $this->created_at ? $this->created_at->format('d/m/Y') : date('d/m/Y'),
-        ];
+    $consultation = $this->consultation;
+    $dossier = $consultation->dossier ?? null;
+    $rendezvous = $consultation->rendezvous ?? null;
 
-            $pdf = Pdf::loadView('pdf.ordonnance', $data);
+    if (!$dossier || !$dossier->patient) {
+        throw new \Exception("Dossier médical ou patient introuvable pour cette ordonnance.");
+    }
 
-            return $pdf->stream("ordonnance_{$this->id}.pdf");
-        }
+    $data = [
+        'ordonnance' => $this,
+        'patient'    => $dossier->patient->user ?? null,
+        'medecin'    => $rendezvous->medecin->user ?? null,
+        'date'       => $this->created_at ? $this->created_at->format('d/m/Y') : date('d/m/Y'),
+    ];
 
-        public function consultation(){
-            return $this->belongsTo(Consultation::class, 'consultation_id');
-        }
+    $pdf = Pdf::loadView('pdf.ordonnance', $data);
+    return $pdf->stream("ordonnance_{$this->id}.pdf");
+}
+
+        public function consultation(): BelongsTo
+{
+    return $this->belongsTo(Consultation::class, 'consultation_id');
+}
 }
