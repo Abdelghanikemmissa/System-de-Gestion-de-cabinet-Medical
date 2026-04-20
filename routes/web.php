@@ -84,9 +84,9 @@ Route::middleware(['auth'])->group(function () {
     
     // Appointment Management
     Route::get('/secretaire/rendez-vous', [SecretaireController::class, 'indexRendezVous'])->name('secretaire.rendezvous');
-    Route::post('/secretaire/rendez-vous/valider/{id}', [SecretaireController::class, 'validerRendezVous'])->name('secretaire.valider');
-    Route::post('/secretaire/rendez-vous/annuler/{id}', [SecretaireController::class, 'annulerRendezVous'])->name('secretaire.annuler');
     
+    Route::post('/rendezvous/confirmer/{id}', [SecretaireController::class, 'confirmerRendezVous'])->name('secretaire.confirmer');
+    Route::post('/rendezvous/annuler/{id}', [SecretaireController::class, 'annulerRendezVous'])->name('secretaire.annuler');
 });
 
 Route::middleware(['auth'])->prefix('patient')->name('patient.')->group(function () {

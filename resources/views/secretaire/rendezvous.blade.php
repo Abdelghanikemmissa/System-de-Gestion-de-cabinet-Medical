@@ -21,12 +21,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Dashboard
             </a>
-
             <a href="{{ route('secretaire.patients') }}" class="flex items-center gap-3 text-slate-400 hover:bg-slate-800 p-3 rounded-xl transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                 Patients
             </a>
-
             <a href="{{ route('secretaire.rendezvous') }}" class="flex items-center gap-3 bg-emerald-600/20 text-emerald-400 p-3 rounded-xl font-medium">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Rendez-vous
@@ -48,15 +46,9 @@
         <header class="flex justify-between items-center mb-10">
             <div>
                 <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Gestion des Rendez-vous</h2>
-                <p class="text-slate-500">Consultez, confirmez ou annulez les rendez-vous du cabinet</p>
+                <p class="text-slate-500">Validez ou annulez les demandes de rendez-vous entrantes</p>
             </div>
         </header>
-
-        @if(session('success'))
-            <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded-lg shadow-sm">
-                {{ session('success') }}
-            </div>
-        @endif
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
@@ -74,54 +66,48 @@
                         @forelse($rendezvous as $rdv)
                         <tr class="hover:bg-slate-50 transition group">
                             <td class="px-8 py-5">
-                                <div class="font-bold text-slate-700">{{ $rdv->patient->user->nom }} {{ $rdv->patient->user->prenom }}</div>
-                                <div class="text-xs text-slate-400">{{ $rdv->patient->user->email }}</div>
+                                <div class="font-bold text-slate-700">{{ $rdv->patient->user->nom ?? 'N/A' }} {{ $rdv->patient->user->prenom ?? '' }}</div>
+                                <div class="text-xs text-slate-400">{{ $rdv->patient->user->email ?? '' }}</div>
                             </td>
                             <td class="px-8 py-5 text-slate-600">
-                                <span class="font-medium text-slate-700">Dr. {{ $rdv->medecin->user->nom }}</span>
+                                <span class="font-medium text-slate-700">Dr. {{ $rdv->medecin->user->nom ?? 'Alami' }}</span>
                             </td>
                             <td class="px-8 py-5 text-slate-600">
                                 {{ $rdv->date_heure->format('d/m/Y') }} à <span class="font-bold text-slate-800">{{ $rdv->date_heure->format('H:i') }}</span>
                             </td>
                             <td class="px-8 py-5">
                                 @if($rdv->statut == 'en attente')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 uppercase">En attente</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-tighter">En attente</span>
                                 @elseif($rdv->statut == 'confirmé')
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 uppercase">Confirmé</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 uppercase tracking-tighter">Confirmé</span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 uppercase">Annulé</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700 uppercase tracking-tighter">Annulé</span>
                                 @endif
                             </td>
                             <td class="px-8 py-5">
-                                <div class="flex justify-center gap-2">
+                                <div class="flex justify-center gap-4">
                                     @if($rdv->statut == 'en attente')
-                                        <form action="{{ route('secretaire.valider', $rdv->id) }}" method="POST">
+                                        <form action="{{ route('secretaire.confirmer', $rdv->id) }}" method="POST">
                                             @csrf
-                                            <button class="bg-emerald-600 text-white text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:bg-emerald-700 transition shadow-sm">
-                                                Confirmer
+                                            <button type="submit" class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white transition shadow-sm">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                             </button>
                                         </form>
+
                                         <form action="{{ route('secretaire.annuler', $rdv->id) }}" method="POST">
                                             @csrf
-                                            <button class="bg-white border border-slate-200 text-slate-500 text-[10px] px-4 py-2 rounded-lg font-black uppercase hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition">
-                                                Annuler
+                                            <button type="submit" class="flex items-center justify-center w-10 h-10 rounded-full border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition shadow-sm">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                             </button>
                                         </form>
                                     @else
-                                        <span class="text-slate-300 text-[10px] font-bold uppercase italic tracking-widest">Action terminée</span>
+                                        <span class="text-slate-300 text-[10px] font-bold uppercase italic tracking-widest">Traité</span>
                                     @endif
                                 </div>
                             </td>
                         </tr>
                         @empty
-                        <tr>
-                            <td colspan="5" class="px-8 py-20 text-center">
-                                <div class="text-slate-300 mb-2">
-                                    <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                </div>
-                                <p class="text-slate-400 font-medium">Aucun rendez-vous enregistré pour le moment.</p>
-                            </td>
-                        </tr>
+                        <tr><td colspan="5" class="p-20 text-center text-slate-400">Aucun rendez-vous.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
