@@ -6,6 +6,7 @@ use App\Http\Controllers\MedecinController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\ConsultationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SecretaireController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,9 @@ Route::get('/', function () {
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
+Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -46,9 +50,13 @@ Route::get('/recherche-cni', [MedecinController::class, 'rechercheCni'])->name('
     // --- Routes de Consultation ---
     
 // 1. Affiche le formulaire (GET)
-
+    Route::get('consultation/create/{rendezvous_id}', [MedecinController::class, 'createConsultation'])
+     ->name('medecin.consultation.create');
+    
     Route::get('/consultation/create/{patient_id}', [ConsultationController::class, 'create'])
          ->name('consultation.create');
+    
+
 
     // 2. Enregistre la consultation (POST) - Une seule route vers le ConsultationController
     Route::post('/consultation/store', [ConsultationController::class, 'store'])
@@ -69,13 +77,6 @@ Route::get('/recherche-cni', [MedecinController::class, 'rechercheCni'])->name('
 })->name('ordonnance.pdf');
 });
 
-use App\Http\Controllers\SecretaireController;
-
-
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/signup', [AuthController::class, 'showSignup'])->name('signup');
-Route::post('/signup', [AuthController::class, 'signup'])->name('signup.submit');
 
 
 Route::middleware(['auth'])->group(function () {
