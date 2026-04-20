@@ -53,4 +53,5 @@ class Consultation extends Model
     {
         return $this->belongsTo(DossierMedical::class, 'dossier_medical_id');
     }
+
 }

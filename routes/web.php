@@ -86,4 +86,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/secretaire/rendez-vous', [SecretaireController::class, 'indexRendezVous'])->name('secretaire.rendezvous');
     Route::post('/secretaire/rendez-vous/valider/{id}', [SecretaireController::class, 'validerRendezVous'])->name('secretaire.valider');
     Route::post('/secretaire/rendez-vous/annuler/{id}', [SecretaireController::class, 'annulerRendezVous'])->name('secretaire.annuler');
+    
+});
+
+Route::middleware(['auth'])->prefix('patient')->name('patient.')->group(function () {
+    Route::get('/dashboard', [PatientController::class, 'dashboard'])->name('dashboard');
+    
+    // Rendez-vous
+    Route::get('/rdv/create', fn() => view('dashboard.patient.rendez_vous.create'))->name('rdv.create');
+    Route::post('/rdv/store', [PatientController::class, 'prendre_rdv'])->name('rdv.store');
+    
+    // Consultations
+    Route::get('/consultations', [PatientController::class, 'indexConsultations'])->name('consultations.index');
+    Route::get('/consultations/{id}', [PatientController::class, 'showConsultation'])->name('consultations.show');
+
+    Route::get('/profile/edit', [PatientController::class, 'editProfile'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfilePatient'])->name('profile.update');
 });

@@ -58,4 +58,6 @@ class RendezVousController extends Controller
             'message' => 'Notification envoyée à ' . $rdv->patient->user->email
         ]);
     }
+
+    
 }

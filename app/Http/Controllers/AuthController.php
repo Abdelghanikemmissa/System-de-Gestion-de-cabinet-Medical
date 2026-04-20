@@ -34,6 +34,7 @@ class AuthController extends Controller
             return match ($user->role) {
                 'medecin'    => redirect()->intended('/medecin/dashboard'),
                 'secretaire' => redirect()->intended('/secretaire/dashboard'),
+                'patient'    => redirect()->intended('/patient/dashboard'),
                 default      => redirect()->intended('/'),
             };
         }

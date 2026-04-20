@@ -84,4 +84,6 @@ class SecretaireController extends Controller
 
         return back()->with('success', 'Rendez-vous annulé avec succès.');
     }
+
+    
 }
