@@ -131,4 +131,16 @@ class MedecinController extends Controller
         \App\Models\Disponibilite::findOrFail($id)->delete();
         return back()->with('success', 'Créneau supprimé.');
     }
+
+    public function createConsultation($rendezvous_id)
+{
+    // 1. Chercher le rdv
+    $rendezvous = \App\Models\RendezVous::findOrFail($rendezvous_id);
+    
+    // 2. Chercher le patient associé
+    $patient = $rendezvous->patient; 
+
+    // 3. Envoyer les deux à la VUE
+    return view('dashboard.medecin.consultations.create', compact('rendezvous', 'patient'));
+}
 }

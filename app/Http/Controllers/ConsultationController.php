@@ -21,34 +21,12 @@ class ConsultationController extends Controller
     /**
      * ENREGISTRER une nouvelle consultation
      */
-//     public function store(Request $request)
-// {
-//     $request->validate([
-//         'patient_id'   => 'required|exists:patients,id',
-//         'compte_rendu' => 'required|string',
-        
-//     ]);
-
-//     $patient = \App\Models\Patient::findOrFail($request->patient_id);
-    
-//     // SÉCURITÉ : Récupère le dossier ou le crée s'il n'existe pas
-//     $dossier = \App\Models\DossierMedical::firstOrCreate(['patient_id' => $patient->id]);
-
-//     \App\Models\Consultation::create([
-//         'dossier_medical_id' => $dossier->id,
-//         'compte_rendu'       => $request->compte_rendu,
-//         'date_consultation'  => now(), 
-//     ]);
-
-//     return redirect()->route('medecin.dossier', $patient->id)
-//                      ->with('success', 'Consultation enregistrée !');
-// }
 
 public function store(Request $request)
 {
     $request->validate([
         'patient_id'    => 'required|exists:patients,id',
-        'rendezvous_id' => 'nullable|exists:rendezvous,id', // Ajout de la validation
+        'rendezvous_id' => 'required|exists:rendez_vous,id', // Ajout de la validation
         'compte_rendu'  => 'required|string',
     ]);
 
