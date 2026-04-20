@@ -92,5 +92,5 @@ class SecretaireController extends Controller
         return back()->with('success', 'Le rendez-vous a été annulé.');
     }
 
- 
+    
 }

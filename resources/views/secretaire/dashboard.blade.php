@@ -13,7 +13,7 @@
             <div class="bg-emerald-500 p-2 rounded-lg">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <span class="text-xl font-bold tracking-wider">MED-FLOW</span>
+            <span class="text-xl font-bold tracking-wider">SercretaireCare</span>
         </div>
 
         <nav class="flex-1 space-y-2">
