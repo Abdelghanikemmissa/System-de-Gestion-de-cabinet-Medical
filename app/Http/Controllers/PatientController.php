@@ -195,7 +195,7 @@ class PatientController extends Controller
         // 4. Récupérer les 3 derniers rendez-vous
         $derniersRdv = \App\Models\RendezVous::where('patient_id', $patient->id)
                         ->latest()
-                        ->limit(6)
+                        ->limit(8)
                         ->get();
 
         return view('dashboard.patient.index', compact('nbrRendezvous', 'nbrConsultations', 'derniersRdv'));
@@ -222,6 +222,4 @@ class PatientController extends Controller
         $user = Auth::user();
         return view('dashboard.patient.profile.edit', compact('user'));
     }
-
-
 }

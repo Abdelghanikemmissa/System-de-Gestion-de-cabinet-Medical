@@ -28,6 +28,16 @@ class DatabaseSeeder extends Seeder
             'nom' => 'Bennani', 'prenom' => 'Sanaa', 'email' => 'secretaire@test.com',
             'password' => Hash::make('password'), 'cni' => 'SEC456', 'role' => 'secretaire',
         ]);
+        $userAdmin = User::create([
+            'nom' => 'Admin', 'prenom' => 'Super', 'email' => 'admin@test.com',
+            'password' => Hash::make('password'), 'cni' => 'ADM789', 'role' => 'admin',
+        ]);
+        admin::create(['user_id' => $userAdmin->id]);
+
+                $userSecretaire = User::create([
+            'nom' => 'Bennani', 'prenom' => 'Sanaa', 'email' => 'secretaire@test.com',
+            'password' => Hash::make('password'), 'cni' => 'SEC456', 'role' => 'secretaire',
+        ]);
         Secretaire::create(['user_id' => $userSecretaire->id]);
 
         // 3. PATIENTS, DOSSIERS, RDV ET CONSULTATIONS

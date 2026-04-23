@@ -32,6 +32,8 @@ class RendezVous extends Model
         $this->update(['statut' => 'annulé']);
     }
 
+    
+
     // --- RELATIONS ---
 
     public function patient(): BelongsTo
