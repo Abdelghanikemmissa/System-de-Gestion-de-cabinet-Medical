@@ -42,6 +42,38 @@ class RendezVousController extends Controller
         ]);
     }
 
+    public function indexRendezvous(Request $request)
+{
+    $query = \App\Models\RendezVous::query()->with(['patient.user', 'medecin.user']);
+
+    // 1. Filtrage par date
+    if ($request->filled('date')) {
+        $query->whereDate('date_heure', $request->date);
+    }
+
+    // 2. Filtrage par statut
+    if ($request->filled('statut')) {
+        // On utilise la comparaison directe
+        $query->where('statut', $request->statut);
+    }
+
+    $rendezvous = $query->latest()->get();
+
+    return view('dashboard.secretaire.rendezvous', compact('rendezvous'));
+}
+
+public function voirPlanningAujourdhui()
+{
+    // Récupère uniquement les RDV confirmés pour la date actuelle
+    $rdvAujourdhui = \App\Models\RendezVous::with(['patient.user'])
+        ->where('statut', 'confirmé')
+        ->whereDate('date_heure', today()) // Filtre sur la date d'aujourd'hui
+        ->orderBy('date_heure', 'ASC')    // Trié par heure
+        ->get();
+
+    return $rdvAujourdhui;
+}
+
     /**
      * Notification manuelle (Si besoin de renvoyer l'email)
      */
@@ -58,6 +90,5 @@ class RendezVousController extends Controller
             'message' => 'Notification envoyée à ' . $rdv->patient->user->email
         ]);
     }
-
     
 }

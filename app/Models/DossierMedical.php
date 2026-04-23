@@ -10,8 +10,8 @@ class DossierMedical extends Model
 {
     protected $table = 'dossier_medicals';
 
-    // Garde 'patient_id' et 'numero' (ou les champs de ta migration).
-    protected $fillable = ['patient_id', 'numero'];
+    // Garde 'patient_id' et 'historique' (ou les champs de ta migration).
+    protected $fillable = ['patient_id', 'historique'];
 
     /*
      * Un dossier possède plusieurs consultations.
