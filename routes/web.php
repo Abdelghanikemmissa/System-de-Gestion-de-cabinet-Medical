@@ -94,8 +94,9 @@ Route::middleware(['auth'])->group(function () {
         return view('secretaire.create');
     })->name('secretaire.create');
 
-    Route::post('/secretaire/ajouter', [App\Http\Controllers\SecretaireController::class, 'ajouterNouveauPatient'])
+    Route::post('/secretaire/ajouter', [SecretaireController::class, 'ajouterNouveauPatient'])
          ->name('secretaire.ajouter');
+    
 });
 
 Route::middleware(['auth'])->prefix('patient')->name('patient.')->group(function () {
