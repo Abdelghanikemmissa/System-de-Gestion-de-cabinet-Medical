@@ -104,3 +104,17 @@ Route::middleware(['auth'])->prefix('patient')->name('patient.')->group(function
     Route::get('/profile/edit', [PatientController::class, 'editProfile'])->name('profile.edit');
     Route::put('/profile/update', [ProfileController::class, 'updateProfilePatient'])->name('profile.update');
 });
+
+
+
+use App\Http\Controllers\AdminController;
+
+// Update your existing admin group to include the 'isAdmin' middleware
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('/staff/store', [AdminController::class, 'storeStaff'])->name('staff.store');
+    // Add other admin routes here...
+});
+
+
+
