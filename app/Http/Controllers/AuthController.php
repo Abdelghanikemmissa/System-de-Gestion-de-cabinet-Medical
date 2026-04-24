@@ -32,12 +32,15 @@ class AuthController extends Controller
 
             // Redirection dynamique selon le rôle
             return match ($user->role) {
+                'admin'      => redirect()->intended('/admin/dashboard'),
                 'medecin'    => redirect()->intended('/medecin/dashboard'),
                 'secretaire' => redirect()->intended('/secretaire/dashboard'),
                 'patient'    => redirect()->intended('/patient/dashboard'),
                 default      => redirect()->intended('/'),
             };
         }
+
+       
 
         return back()->withErrors([
             'email' => 'Les identifiants sont incorrects.',
@@ -137,7 +140,6 @@ class AuthController extends Controller
 
     return redirect()->route('login')->with('success', 'Inscription avec succès !');
 }
-    public function showSignup() {
-        return view('auth.signup');
-    }
+
+
 }
