@@ -201,6 +201,15 @@ class PatientController extends Controller
         return view('dashboard.patient.index', compact('nbrRendezvous', 'nbrConsultations', 'derniersRdv'));
     }
 
+    // public function indexConsultations()
+    // {
+    //     $patient = Auth::user()->patient;
+    //     $consultations = \App\Models\Consultation::whereHas('rendezvous', function($q) use ($patient) {
+    //         $q->where('patient_id', $patient->id);
+    //     })->latest()->get();
+
+    //     return view('dashboard.patient.consultations.index', compact('consultations'));
+    // }
     public function indexConsultations()
 {
     $user = Auth::user();
@@ -220,17 +229,6 @@ class PatientController extends Controller
     return view('dashboard.patient.consultations.index', compact('consultations'));
 }
 
-    // public function indexConsultations()
-    // {
-    //     $patient = Auth::user()->patient;
-    //     $consultations = \App\Models\Consultation::whereHas('rendezvous', function($q) use ($patient) {
-    //         $q->where('patient_id', $patient->id);
-    //     })->latest()->get();
-
-    //     return view('dashboard.patient.consultations.index', compact('consultations'));
-    // }
-
-    
     public function showConsultation($id)
     {
         $consultation = \App\Models\Consultation::findOrFail($id);
