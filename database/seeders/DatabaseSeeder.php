@@ -24,15 +24,8 @@ class DatabaseSeeder extends Seeder
         $medecin = Medecin::create(['user_id' => $userMedecin->id, 'specialite' => 'Cardiologue']);
 
         // 2. SECRÉTAIRE
-        $userSecretaire = User::create([
-            'nom' => 'Bennani', 'prenom' => 'Sanaa', 'email' => 'secretaire@test.com',
-            'password' => Hash::make('password'), 'cni' => 'SEC456', 'role' => 'secretaire',
-        ]);
-        $userAdmin = User::create([
-            'nom' => 'Admin', 'prenom' => 'Super', 'email' => 'admin@test.com',
-            'password' => Hash::make('password'), 'cni' => 'ADM789', 'role' => 'admin',
-        ]);
-        admin::create(['user_id' => $userAdmin->id]);
+
+
 
                 $userSecretaire = User::create([
             'nom' => 'Bennani', 'prenom' => 'Sanaa', 'email' => 'secretaire@test.com',
