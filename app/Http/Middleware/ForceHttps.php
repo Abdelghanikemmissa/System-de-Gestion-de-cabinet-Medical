@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
-class ForceHttp
+class ForceHttps
 {
     /**
      * Gérer la requête entrante.
