@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+public function dashboard()
     {
         $stats = [
             'total_medecins' => Medecin::count(),
@@ -23,10 +23,11 @@ class AdminController extends Controller
             'rdv_confirmes' => RendezVous::where('statut', 'confirmé')->count(),
         ];
 
-        // Fetch recent staff with consistent role naming
-        $recentStaff = User::whereIn('role', ['medecin', 'secretaire', 'admin'])->latest()->take(5)->get();
+        // Récupérer les listes pour le tableau de bord
+        $medecins = Medecin::with('user')->get();
+        $patients = Patient::all();
 
-        return view('admin.dashboard', compact('stats', 'recentStaff'));
+        return view('admin.dashboard', compact('stats', 'medecins', 'patients'));
     }
 
     public function storeStaff(Request $request)
@@ -68,5 +69,18 @@ class AdminController extends Controller
         }
 
         return redirect()->back()->with('success', 'Membre ajouté avec succès !');
+    }
+
+    public function listMedecins()
+    {
+        $medecins = Medecin::with('user')->get(); // 'with' charge les infos utilisateur liées
+        return view('admin.medecins.index', compact('medecins'));
+    }
+
+    // Pour afficher la liste des patients
+    public function listPatients()
+    {
+        $patients = Patient::all();
+        return view('admin.patients.index', compact('patients'));
     }
 }

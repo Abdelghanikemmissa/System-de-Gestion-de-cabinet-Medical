@@ -1,143 +1,124 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MediPlus</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Inter', sans-serif; }
-.hidden { display:none !important; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediPlus - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .hidden { display:none !important; }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-slate-200 flex min-h-screen">
+<body class="bg-gradient-to-br from-blue-50 to-green-50 flex min-h-screen">
 
-<!-- Sidebar -->
-<aside class="w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200 p-6 flex flex-col shadow-xl">
-    <div class="flex items-center gap-3 mb-12">
-        <div class="w-12 h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-lg">M+</div>
-        <span class="text-2xl font-black text-slate-800">MediPlus</span>
+<aside class="w-64 bg-white/90 backdrop-blur border-r border-blue-100 p-6 flex flex-col shadow-sm">
+    <div class="flex items-center gap-3 mb-10">
+        <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-green-400 rounded-xl flex items-center justify-center text-white font-bold">M+</div>
+        <span class="text-lg font-semibold text-slate-800">MediPlus</span>
     </div>
 
-    <nav class="flex flex-col gap-3">
-        <button onclick="switchTab('stats')" id="nav-stats" class="nav-link flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg font-semibold">
-            📊 Dashboard
-        </button>
-        <button onclick="switchTab('medecin')" id="nav-medecin" class="nav-link p-4 rounded-2xl text-slate-600 hover:bg-slate-100 font-semibold">
-            👨‍⚕️ Médecins
-        </button>
-        <button onclick="switchTab('secretaire')" id="nav-secretaire" class="nav-link p-4 rounded-2xl text-slate-600 hover:bg-slate-100 font-semibold">
-            📝 Secrétaires
-        </button>
+    <nav class="flex flex-col gap-2">
+        <button onclick="switchTab('stats')" id="nav-stats" class="nav-link p-3 rounded-xl bg-gradient-to-r from-blue-500 to-green-400 text-white font-medium shadow-sm">Dashboard</button>
+        <button onclick="switchTab('list-medecins')" id="nav-list-medecins" class="nav-link p-3 rounded-xl text-slate-600 hover:bg-blue-50 transition">👨‍⚕️ Médecins</button>
+        <button onclick="switchTab('list-patients')" id="nav-list-patients" class="nav-link p-3 rounded-xl text-slate-600 hover:bg-blue-50 transition">👥 Patients</button>
+        <button onclick="switchTab('form')" id="nav-form" class="nav-link p-3 rounded-xl text-slate-600 hover:bg-blue-50 transition">➕ Ajouter Membre</button>
     </nav>
-
-    <div class="mt-auto text-sm text-slate-400 pt-10">MediPlus</div>
 </aside>
 
-<!-- Main -->
 <main class="flex-1 p-10">
-    <h1 id="main-title" class="text-4xl font-black text-slate-800 mb-10">Dashboard</h1>
+    <h1 id="main-title" class="text-3xl font-bold text-slate-800 mb-8">Tableau de bord</h1>
 
-    <!-- Stats -->
-    <div id="view-stats" class="space-y-10">
-        
-        <!-- Cards -->
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="bg-white rounded-3xl p-6 shadow-lg">
-                <p class="text-slate-500">Médecins</p>
-                <h2 class="text-3xl font-black">{{ $stats['total_medecins'] }}</h2>
+    <div id="view-stats" class="space-y-8">
+        <div class="grid md:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <p class="text-sm text-slate-500">Médecins</p>
+                <h2 class="text-2xl font-bold text-blue-600">{{ $stats['total_medecins'] }}</h2>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-lg">
-                <p class="text-slate-500">Secrétaires</p>
-                <h2 class="text-3xl font-black">{{ $stats['total_secretaires'] }}</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <p class="text-sm text-slate-500">Secrétaires</p>
+                <h2 class="text-2xl font-bold text-green-500">{{ $stats['total_secretaires'] }}</h2>
             </div>
-            <div class="bg-white rounded-3xl p-6 shadow-lg">
-                <p class="text-slate-500">Rendez-vous</p>
-                <h2 class="text-3xl font-black">{{ $stats['total_rdv'] }}</h2>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <p class="text-sm text-slate-500">Patients</p>
+                <h2 class="text-2xl font-bold text-purple-500">{{ $stats['total_patients'] }}</h2>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <p class="text-sm text-slate-500">Rendez-vous</p>
+                <h2 class="text-2xl font-bold text-slate-700">{{ $stats['total_rdv'] }}</h2>
             </div>
         </div>
-
-        <!-- Charts -->
-        <div class="grid lg:grid-cols-2 gap-8">
-            <div class="bg-white p-6 rounded-3xl shadow-lg">
-                <h3 class="font-bold mb-4">Personnel</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <h3 class="font-semibold text-slate-700 mb-4">Personnel</h3>
                 <canvas id="barChart"></canvas>
             </div>
-            <div class="bg-white p-6 rounded-3xl shadow-lg">
-                <h3 class="font-bold mb-4">Rendez-vous</h3>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+                <h3 class="font-semibold text-slate-700 mb-4">Rendez-vous</h3>
                 <canvas id="pieChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Form -->
+    <div id="view-list-medecins" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+        <table class="w-full text-left">
+            <thead class="text-slate-400 text-sm border-b"><tr><th class="pb-3">Nom complet</th><th class="pb-3">Spécialité</th><th class="pb-3">Email</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach($medecins as $m)
+                <tr><td class="py-4">{{ $m->user->nom }} {{ $m->user->prenom }}</td><td class="py-4">{{ $m->specialite }}</td><td class="py-4">{{ $m->user->email }}</td></tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <div id="view-list-patients" class="hidden bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
+        <table class="w-full text-left">
+            <thead class="text-slate-400 text-sm border-b"><tr><th class="pb-3">Nom</th><th class="pb-3">Email</th><th class="pb-3">CNI</th></tr></thead>
+            <tbody class="divide-y divide-gray-100">
+                @foreach($patients as $p)
+                <tr><td class="py-4">{{ $p->nom }} {{ $p->prenom }}</td><td class="py-4">{{ $p->email }}</td><td class="py-4">{{ $p->cni }}</td></tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
     <div id="view-form" class="hidden">
-        <div class="max-w-3xl mx-auto bg-white p-10 rounded-3xl shadow-2xl">
-            <h2 class="text-2xl font-black mb-8">Ajouter utilisateur</h2>
-
-            <form class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <input type="text" placeholder="Nom" class="input">
-                <input type="text" placeholder="Prénom" class="input">
-                <input type="email" placeholder="Email" class="input">
-                <input type="text" placeholder="CNI" class="input">
-                <input type="password" placeholder="Mot de passe" class="input col-span-2">
-                
-                <div id="specialite-field" class="col-span-2">
-                    <input type="text" placeholder="Spécialité" class="input w-full">
-                </div>
-
-                <button class="col-span-2 bg-gradient-to-r from-slate-900 to-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:scale-105 transition">
-                    Ajouter
-                </button>
+        <div class="max-w-2xl bg-white p-8 rounded-2xl shadow-sm border border-blue-100">
+            <form action="{{ route('admin.store') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <input type="text" name="nom" placeholder="Nom" class="input" required>
+                <input type="text" name="prenom" placeholder="Prénom" class="input" required>
+                <input type="email" name="email" placeholder="Email" class="input" required>
+                <input type="text" name="cni" placeholder="CNI" class="input" required>
+                <input type="password" name="password" placeholder="Mot de passe" class="input col-span-2" required>
+                <select name="role" class="input" onchange="toggleSpecialite(this.value)">
+                    <option value="medecin">Médecin</option>
+                    <option value="secretaire">Secrétaire</option>
+                    <option value="admin">Admin</option>
+                </select>
+                <input type="text" name="specialite" id="spec" placeholder="Spécialité" class="input">
+                <button class="col-span-2 bg-blue-600 text-white py-3 rounded-xl font-medium">Confirmer</button>
             </form>
         </div>
     </div>
 </main>
 
-<style>
-.input {
-    background:#f1f5f9;
-    padding:14px;
-    border-radius:14px;
-    outline:none;
-}
-.input:focus {
-    box-shadow:0 0 0 2px #3b82f6;
-}
-</style>
-
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    new Chart(document.getElementById('barChart'), {
-        type:'bar',
-        data:{
-            labels:['Médecins','Secrétaires'],
-            datasets:[{data:[10,5]}]
+    function switchTab(type) {
+        document.querySelectorAll('[id^="view-"]').forEach(v => v.classList.add('hidden'));
+        document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('bg-gradient-to-r','from-blue-500','to-green-400','text-white'));
+        
+        const view = document.getElementById('view-' + type);
+        if(view) {
+            view.classList.remove('hidden');
+            document.getElementById('nav-' + type).classList.add('bg-gradient-to-r','from-blue-500','to-green-400','text-white');
         }
-    });
-
-    new Chart(document.getElementById('pieChart'), {
-        type:'doughnut',
-        data:{
-            labels:['Confirmés','Autres'],
-            datasets:[{data:[20,10]}]
-        }
-    });
-});
-
-function switchTab(type){
-    document.getElementById('view-stats').classList.add('hidden');
-    document.getElementById('view-form').classList.add('hidden');
-
-    if(type==='stats'){
-        document.getElementById('view-stats').classList.remove('hidden');
-    } else {
-        document.getElementById('view-form').classList.remove('hidden');
     }
-}
+    function toggleSpecialite(role) {
+        document.getElementById('spec').style.display = (role === 'medecin') ? 'block' : 'none';
+    }
 </script>
-
 </body>
 </html>
