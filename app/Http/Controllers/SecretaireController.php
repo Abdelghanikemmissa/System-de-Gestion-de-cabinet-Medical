@@ -10,20 +10,30 @@ use Illuminate\Support\Facades\Auth;
 class SecretaireController extends Controller
 {
     public function showDashboard()
-    {
-        $stats = [
-            'today_rv' => RendezVous::whereDate('date_heure', today())->count(),
-            'new_patients' => Patient::whereDate('created_at', today())->count(),
-            'pending' => RendezVous::where('statut', 'en attente')->count(),
-        ];
+{
+    // 1. Statistiques
+    $stats = [
+        'today_rv' => \App\Models\RendezVous::where('statut', 'confirmé')
+                                           ->whereDate('date_heure', today())->count(),
+        'new_patients' => \App\Models\Patient::whereDate('created_at', today())->count(),
+        'pending' => \App\Models\RendezVous::where('statut', 'en_attente')->count(),
+    ];
 
-        $rendezvous = RendezVous::with(['patient.user', 'medecin.user'])
-            ->where('statut', 'en attente')
-            ->orderBy('date_heure', 'asc')
-            ->get();
+    // 2. Rendez-vous confirmés pour le programme d'aujourd'hui
+    $rendezVous = \App\Models\RendezVous::with(['patient.user'])
+        ->where('statut', 'confirmé')
+        ->whereDate('date_heure', today())
+        ->orderBy('date_heure', 'asc')
+        ->get();
 
-        return view('/secretaire/dashboard', compact('stats', 'rendezvous'));
-    }
+    // 3. Rendez-vous en attente (pour la colonne latérale)
+    $rendezvousPending = \App\Models\RendezVous::with(['patient.user'])
+        ->where('statut', 'en attente')
+        ->orderBy('date_heure', 'asc')
+        ->get();
+
+    return view('secretaire.dashboard', compact('stats', 'rendezVous', 'rendezvousPending'));
+}
 
   
 
@@ -43,7 +53,7 @@ class SecretaireController extends Controller
         $secretaire = Auth::user()->secretaire;
         $secretaire->creerFicheEtDossier($validated['cni'], $validated);
 
-        return redirect()->route('secretaire.dashboard')->with('success', 'Patient créé avec succès');
+        return redirect()->route('secretaire.dashboard')->with('success', 'Patient ajouté avec succès !');
     }
 
     public function indexPatients()

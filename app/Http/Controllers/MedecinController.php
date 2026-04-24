@@ -67,18 +67,22 @@ class MedecinController extends Controller
     }
 
     
-    // --- PLANNING & DISPONIBILITÉS ---
+    // --- PLANNING ---
+
+
     public function voirPlanning()
     {
+        // On ajoute ->where('statut', 'confirmer') pour filtrer les résultats
         $rendezVous = \App\Models\RendezVous::with(['patient.user'])
+            ->where('statut', 'confirmé') 
             ->get();
 
         $events = $rendezVous->map(function ($rdv) {
             return [
                 'title' => $rdv->patient->user->nom . ' ' . $rdv->patient->user->prenom,
-                'start' => $rdv->date_heure, // Format YYYY-MM-DD HH:MM:SS
+                'start' => $rdv->date_heure,
                 'url'   => route('medecin.dossier', $rdv->patient->id),
-                'backgroundColor' => '#2563eb', // Couleur bleue professionnelle
+                'backgroundColor' => '#2563eb',
             ];
         });
 
