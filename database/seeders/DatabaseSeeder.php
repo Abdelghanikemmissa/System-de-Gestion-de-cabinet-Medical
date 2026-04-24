@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\Medecin;
 use App\Models\Secretaire;
 use App\Models\Patient;
@@ -20,6 +21,11 @@ class DatabaseSeeder extends Seeder
         $userMedecin = User::create([
             'nom' => 'Alami', 'prenom' => 'Ahmed', 'email' => 'medecin@test.com',
             'password' => Hash::make('password'), 'cni' => 'MED123', 'role' => 'medecin',
+        ]);
+
+        // 2. Link it to the Admin table
+        Admin::create([
+            'user_id' => $userMedecin->id,
         ]);
         $medecin = Medecin::create(['user_id' => $userMedecin->id, 'specialite' => 'Cardiologue']);
 
@@ -48,6 +54,17 @@ class DatabaseSeeder extends Seeder
             ['nom' => 'Amrani', 'prenom' => 'Mehdi', 'email' => 'mehdi@test.com', 'cni' => 'EE500', 'sexe' => 'M', 'tel' => '0612345678'],
             ['nom' => 'Kabbaj', 'prenom' => 'Sofia', 'email' => 'sofia@test.com', 'cni' => 'FF600', 'sexe' => 'F', 'tel' => '0677889900'],
         ];
+
+        // database/seeders/DatabaseSeeder.php
+        // $user = User::create([
+        //     'nom' => 'Admin',
+        //     'prenom' => 'System',
+        //     'email' => 'admin@clinic.com',
+        //     'password' => Hash::make('password'),
+        //     'role' => 'admin',
+        //     'cni' => 'ADMIN123'
+        // ]);
+        // Admin::create(['user_id' => $user->id]);
 
         foreach ($patientsData as $data) {
             $userPatient = User::create([

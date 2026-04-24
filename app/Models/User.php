@@ -73,4 +73,16 @@ class User extends Authenticatable
     {
         return $this->role === 'secretaire';
     }
+
+        // Inside User.php class
+    public function admin()
+    {
+        return $this->hasOne(Admin::class, 'user_id');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+    
 }
