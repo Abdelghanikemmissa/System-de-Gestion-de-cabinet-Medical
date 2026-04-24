@@ -201,15 +201,33 @@ class PatientController extends Controller
         return view('dashboard.patient.index', compact('nbrRendezvous', 'nbrConsultations', 'derniersRdv'));
     }
 
-    public function indexConsultations()
-    {
-        $patient = Auth::user()->patient;
-        $consultations = \App\Models\Consultation::whereHas('rendezvous', function($q) use ($patient) {
-            $q->where('patient_id', $patient->id);
-        })->latest()->get();
+    // public function indexConsultations()
+    // {
+    //     $patient = Auth::user()->patient;
+    //     $consultations = \App\Models\Consultation::whereHas('rendezvous', function($q) use ($patient) {
+    //         $q->where('patient_id', $patient->id);
+    //     })->latest()->get();
 
-        return view('dashboard.patient.consultations.index', compact('consultations'));
+    //     return view('dashboard.patient.consultations.index', compact('consultations'));
+    // }
+    public function indexConsultations()
+{
+    $user = Auth::user();
+
+    // 1. Vérification : Est-ce qu'on a bien un patient ?
+    if (!$user->patient) {
+        return redirect()->back()->with('error', 'Vous n\'avez pas de profil patient associé.');
     }
+
+    // 2. Maintenant, on peut accéder à $user->patient->id sans risque
+    $patientId = $user->patient->id;
+
+    $consultations = \App\Models\Consultation::whereHas('rendezvous', function($q) use ($patientId) {
+        $q->where('patient_id', $patientId);
+    })->latest()->get();
+
+    return view('dashboard.patient.consultations.index', compact('consultations'));
+}
 
     public function showConsultation($id)
     {
