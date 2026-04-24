@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // 1. Vos exceptions CSRF existantes
         $middleware->validateCsrfTokens(except: [
             '/secretaire/*',
             '/medecin/*',
@@ -20,8 +21,16 @@ return Application::configure(basePath: dirname(__DIR__))
             '/consultation/*',
             '/ordonnance/*',
             '/login',
-        '/logout',
+            '/logout',
         ]);
+
+        // 2. AJOUT : Forcer le HTTPS en production
+        $middleware->web(append: [
+            \App\Http\Middleware\ForceHttps::class,
+        ]);
+
+        // 3. AJOUT : Faire confiance au proxy de Railway (Crucial)
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         
