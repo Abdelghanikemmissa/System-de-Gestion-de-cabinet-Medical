@@ -24,9 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
             '/logout',
         ]);
 
-        // 2. AJOUT : Forcer le HTTP en production
+        // 2. AJOUT : Forcer le HTTPS en production
         $middleware->web(append: [
-            \App\Http\Middleware\ForceHttp::class,
+            \App\Http\Middleware\ForceHttps::class,
         ]);
 
         // 3. AJOUT : Faire confiance au proxy de Railway (Crucial)
