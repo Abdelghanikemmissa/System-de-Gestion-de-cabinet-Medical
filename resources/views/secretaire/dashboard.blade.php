@@ -20,7 +20,7 @@
                     <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
-            <span class="text-2xl font-extrabold tracking-wide">SecretaireCare</span>
+            <span class="text-2xl font-extrabold tracking-wide">MediPlus</span>
         </div>
 
         <nav class="flex-1 space-y-3">

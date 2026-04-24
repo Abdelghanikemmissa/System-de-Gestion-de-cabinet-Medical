@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') | MediCare</title>
+    <title>@yield('title', 'Dashboard') | MediPlus</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,7 +19,7 @@
             <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center text-white">
                 <i class="fas fa-stethoscope"></i>
             </div>
-            <h1 class="text-xl font-black tracking-tight">MediCare</h1>
+            <h1 class="text-xl font-black tracking-tight">MediPlus</h1>
         </div>
 
         <nav class="flex-1 px-4 space-y-2">

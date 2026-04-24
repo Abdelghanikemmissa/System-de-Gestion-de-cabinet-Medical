@@ -24,7 +24,7 @@
 
         <div class="p-6 text-2xl font-bold border-b border-white/10 flex items-center gap-3">
             <i class="fas fa-heartbeat text-blue-300"></i>
-            <span>PatientCare</span>
+            <span>MediPlus</span>
         </div>
 
         <nav class="flex-1 p-4 space-y-2">
