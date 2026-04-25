@@ -17,7 +17,9 @@ class AuthController extends Controller
     public function showLogin() {
         return view('auth.login');
     }
-
+    public function showSignup() {
+        return view('auth.signup');
+    }
     // Gère la connexion avec redirection par rôle
     public function login(Request $request)
     {
